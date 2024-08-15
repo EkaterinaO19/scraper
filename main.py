@@ -28,13 +28,11 @@ user_agents = [
 ]
 
 def get_random_headers():
-    """Returns a random User-Agent in the headers."""
     return {
         'User-Agent': random.choice(user_agents)
     }
 
 def scrape_page(url):
-    """Scrapes data from a single page URL"""
     headers = get_random_headers()
     response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -45,23 +43,19 @@ def scrape_page(url):
     weights = []
 
     for product in soup.find_all('div', class_='ProductCard__content'):
-        # Extract image URL
         img_tag = product.find('img', class_='ProductCard__imageImg')
         img_src = img_tag.get('src') if img_tag else 'No image'
         image_urls.append(img_src)
 
-        # Extract product name
         name_tag = product.find('a',
                                 class_='ProductCard__link rtext _desktop-md _mobile-sm gray900 js-datalayer-catalog-list-name')
         name = name_tag.text.strip() if name_tag else 'No name'
         names.append(name)
 
-        # Extract price
         price_tag = product.find('span', class_='js-datalayer-catalog-list-price hidden')
         price = price_tag.text.strip() if price_tag else 'No price'
         prices.append(price)
 
-        # Extract weight
         weight_tag = product.find('div', class_='ProductCard__weight')
         weight = weight_tag.get_text(strip=True) if weight_tag else 'No weight'
         weights.append(weight)
@@ -74,7 +68,6 @@ def scrape_page(url):
     })
 
 def get_max_pages(soup):
-    """Finds the maximum number of pages from pagination"""
     pagination = soup.find('div', class_='VV_Pager')
     if pagination:
         page_links = pagination.find_all('a', href=True)
@@ -84,7 +77,6 @@ def get_max_pages(soup):
     return 1
 
 def scrape_category(category_url):
-    """Scrapes all pages within a category"""
     headers = get_random_headers()
     initial_response = requests.get(category_url, headers=headers)
     initial_soup = BeautifulSoup(initial_response.content, 'html.parser')
@@ -101,7 +93,6 @@ def scrape_category(category_url):
         except Exception as e:
             print(f"Error scraping {page_url}: {e}")
 
-        # Save the data collected so far
         temp_filename = f'temp_scraped_data_{int(time.time())}.xlsx'
         category_data.to_excel(temp_filename, index=False)
 
@@ -110,7 +101,6 @@ def scrape_category(category_url):
     return category_data
 
 def get_category_links(url):
-    """Scrapes the list of category links"""
     headers = get_random_headers()
     response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -118,7 +108,6 @@ def get_category_links(url):
                       soup.find_all('a', class_='VVCatalog2020Menu__Link', href=True)}
     return category_links
 
-# Get category links and scrape each category
 category_links = get_category_links(categories_url)
 all_data = {}
 
